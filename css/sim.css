@@ -1,0 +1,143 @@
+/* ==========================================================================
+   sim.css — simulador ARM
+   ========================================================================== */
+.sim-head { margin-bottom: 1.2rem; }
+.sim-head h1 { margin-bottom: .2em; }
+.sim-head .lede { margin: 0; max-width: 80ch; }
+.sim-bar { display: flex; gap: .8rem 1.6rem; align-items: center; flex-wrap: wrap; position: sticky; top: .6rem; z-index: 30; --fill: color-mix(in srgb, var(--die-2) 96%, transparent); }
+.sim-bar label { display: inline-flex; align-items: center; gap: .5rem; font: 500 .9rem var(--font-display); color: var(--ink-dim); }
+.sim-bar select { max-width: 220px; }
+.sim-ctl { gap: .5rem; }
+.sim-status { margin-left: auto; font: 500 .92rem var(--font-display); color: var(--ink-dim); padding: .2rem .7rem; border-left: 3px solid var(--trace); max-width: 46ch; }
+.sim-status.ok { border-color: var(--mint); color: var(--mint); }
+.sim-status.bad { border-color: var(--alert); color: var(--alert); }
+.sim-status.done { border-color: var(--copper); color: var(--copper); }
+.sim-status.bp { border-color: var(--rose); color: var(--rose); }
+.sim-status.run { border-color: var(--ice); color: var(--ice); animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .55; } }
+
+.sim-grid { display: grid; gap: 1rem; margin-top: 1rem; grid-template-columns: minmax(330px, 1.3fr) minmax(300px, 1fr) minmax(290px, .85fr);
+  grid-template-areas: "ed list regs" "step step mem" "log log log"; }
+.sim-editor { grid-area: ed; } .sim-listing { grid-area: list; } .sim-regs { grid-area: regs; }
+.sim-step { grid-area: step; } .sim-mem { grid-area: mem; } .sim-log { grid-area: log; }
+.sim-editor, .sim-listing, .sim-regs { min-height: 540px; display: flex; flex-direction: column; min-width: 0; }
+.sim-step, .sim-mem, .sim-log { min-width: 0; }
+.sim .panel-title { font-size: .98rem; }
+.sim-ed { flex: 1; min-height: 320px; position: relative; }
+.sim-errs { margin-top: .6rem; max-height: 6.5rem; overflow: auto; border-left: 3px solid var(--alert); padding-left: .7rem; }
+.sim-errs .er { color: var(--alert); font-size: .88rem; line-height: 1.4; padding: .12rem 0; }
+.sim-errs .er b { color: var(--alert); }
+.sim-help { margin-top: 1rem; max-width: none; }
+
+/* -------------------------------- Editor -------------------------------- */
+.ed { position: relative; background: var(--code-bg); border: 1px solid var(--trace-soft); font: 400 14px/22px var(--font-mono); height: 100%; min-height: 160px; }
+.ed-scroll { position: absolute; inset: 0; overflow: auto; scrollbar-width: thin; scrollbar-color: var(--trace) transparent; }
+.ed-body { display: flex; min-width: 100%; min-height: 100%; }
+.ed-gutter { flex: none; position: sticky; left: 0; z-index: 2; background: var(--code-bg); border-right: 1px solid var(--trace-soft); padding-top: 4px; }
+.ed-code { flex: 1; position: relative; display: grid; min-width: max-content; padding-top: 4px; }
+.ed .ln { display: block; position: relative; width: 3.1rem; height: 22px; padding: 0 .55rem 0 0; text-align: right; font: 12px/22px var(--font-mono); color: var(--ink-faint); border: 0; background: none; cursor: pointer; }
+.ed .ln:hover { color: var(--ink); background: color-mix(in srgb, var(--alert) 12%, transparent); }
+.ed .ln.bp::before { content: ""; position: absolute; left: 7px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--alert); }
+.ed .ln.cur { color: var(--mint); background: color-mix(in srgb, var(--mint) 16%, transparent); font-weight: 700; }
+.ed .ln.err { color: #fff; background: var(--alert); }
+.ed-hl, .ed-ta { grid-area: 1 / 1; margin: 0; padding: 0 14px; font: inherit; line-height: 22px; white-space: pre; tab-size: 8; letter-spacing: 0; word-spacing: 0; }
+.ed-hl { pointer-events: none; min-width: 100%; color: var(--ink); }
+.ed-hl .l { height: 22px; }
+.ed-hl .l.cur { background: color-mix(in srgb, var(--mint) 15%, transparent); box-shadow: inset 3px 0 0 var(--mint); }
+.ed-hl .l.bp { background: color-mix(in srgb, var(--alert) 10%, transparent); }
+.ed-hl .l.err { box-shadow: inset 0 -2px 0 var(--alert); background: color-mix(in srgb, var(--alert) 10%, transparent); }
+.ed-ta { resize: none; border: 0; outline: 0; background: transparent; color: transparent; caret-color: var(--ink); overflow: hidden; width: 100%; height: 100%; min-height: 100%; -webkit-text-fill-color: transparent; }
+.ed-ta::selection { background: color-mix(in srgb, var(--ice) 40%, transparent); -webkit-text-fill-color: transparent; }
+.ed.ro .ed-ta { cursor: default; }
+
+/* ------------------------------ Código máquina ------------------------------ */
+.listing-wrap { flex: 1; min-height: 0; overflow: auto; position: relative; border: 1px solid var(--trace-soft); background: var(--code-bg); scrollbar-width: thin; scrollbar-color: var(--trace) transparent; }
+.listing { width: 100%; border-collapse: collapse; font: 400 .86rem var(--font-mono); }
+.listing th { position: sticky; top: 0; z-index: 1; background: var(--die-3); text-align: left; font: 600 .78rem var(--font-display); color: var(--ink-dim); padding: .35rem .5rem; border-bottom: 1px solid var(--trace); }
+.listing td { padding: .22rem .5rem; border-bottom: 1px solid color-mix(in srgb, var(--trace-soft) 60%, transparent); white-space: nowrap; }
+.listing .ad { color: var(--copper); } .listing .hx { color: var(--violet); }
+.listing tr.ir { cursor: pointer; } .listing tr.ir:hover td { background: color-mix(in srgb, var(--ice) 8%, transparent); }
+.listing tr.pool td { color: var(--ink-faint); }
+.listing tr.cur td { background: color-mix(in srgb, var(--mint) 16%, transparent); }
+.listing tr.cur td:first-child { box-shadow: inset 3px 0 0 var(--mint); }
+.listing tr.cur .ad { color: var(--mint); font-weight: 700; }
+.listing tr.last td:first-child { box-shadow: inset 3px 0 0 var(--ice); }
+.listing tr.sel td { background: color-mix(in srgb, var(--violet) 18%, transparent); }
+.listing .bpc { width: 1.6rem; padding-right: 0; }
+.bpdot { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--trace); background: transparent; padding: 0; cursor: pointer; display: block; }
+.bpdot:hover { border-color: var(--alert); } .bpdot.on { background: var(--alert); border-color: var(--alert); }
+.listing .nt { color: var(--ink-faint); cursor: help; font: 400 .8rem var(--font-body); }
+.listing-empty { position: absolute; inset: 2.4rem 1rem 0; margin: 0; font-size: .92rem; }
+
+/* -------------------------------- Registros -------------------------------- */
+.regs { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(8, auto); grid-auto-flow: column; gap: 4px 8px; }
+.sim .rg { font-size: .9rem; padding: .28rem .55rem; cursor: pointer; width: 100%; }
+.sim .rg:hover { border-color: var(--ice); }
+.sim .rg.sel { border-color: var(--violet); background: color-mix(in srgb, var(--violet) 14%, var(--die-3)); }
+.sim .rg.sp3 > span, .sim .rg.sp2 > span, .sim .rg.sp1 > span { color: var(--copper); }
+.reg-detail { margin: .8rem 0 .6rem; min-height: 3.6rem; font-size: .9rem; }
+.reg-detail .bl-bits { flex-wrap: wrap; margin: .3rem 0; }
+.reg-detail .bl-bits i { width: .58rem; margin: 0; font-size: .74rem; line-height: 1.6; }
+.reg-detail .bl-bits em { width: .35rem; }
+.flags-row { margin-top: auto; padding-top: .8rem; border-top: 1px solid var(--trace-soft); display: grid; gap: .6rem; }
+.sim .flags .flag { cursor: default; }
+.conds-live { display: flex; flex-wrap: wrap; gap: .25rem; }
+.conds-live i { font: 600 .72rem var(--font-mono); padding: .04rem .32rem; border: 1px solid var(--trace-soft); color: var(--ink-faint); font-style: normal; cursor: help; }
+.conds-live i.on { color: var(--mint); border-color: var(--mint); background: color-mix(in srgb, var(--mint) 12%, transparent); }
+
+/* ------------------------------ Instrucción actual ------------------------------ */
+.step-body { display: grid; grid-template-columns: minmax(0, .9fr) minmax(320px, 1.1fr); gap: 1.2rem; align-items: start; }
+.step-instr { font-size: 1.12rem; margin-bottom: .5rem; min-height: 1.7em; word-break: break-all; }
+.step-fields .bitrow { --bw: 17px; gap: 6px 5px; }
+.step-fields .fld .bits b { font-size: .88rem; }
+.step-fields .fld .fname { font-size: .72rem; }
+.step-last { margin-top: .9rem; }
+.ls-h { margin-bottom: .3rem; }
+.ls-sym { font: 600 1.05rem var(--font-display); color: var(--mint); }
+.ls-num { color: var(--ink-dim); font-size: .88rem; margin: .1rem 0 .3rem; word-break: break-word; }
+.ls-x { font-size: .88rem; color: var(--ink); }
+.ls-t { margin-top: .4rem; font-size: .9rem; color: var(--ink-dim); }
+.ls-t.bad { color: var(--alert); }
+.stage-txt { font-size: .9rem; color: var(--ink-dim); min-height: 3.6em; margin: .4rem 0 0; }
+.stage-txt b { color: var(--mint); }
+
+/* ---------------------------------- Memoria ---------------------------------- */
+.mem-panel { max-height: 310px; overflow: auto; scrollbar-width: thin; scrollbar-color: var(--trace) transparent; }
+.sim-mem .tabs { margin-bottom: .6rem; }
+.mem-panel h4.mh { margin: .8rem 0 .3rem; font-size: .88rem; }
+.stk-h { margin: 0 0 .4rem; }
+.mem-go { display: flex; gap: .5rem; align-items: center; margin-bottom: .6rem; font: 500 .9rem var(--font-display); color: var(--ink-dim); }
+.mrows { display: flex; flex-direction: column; }
+.mr { display: grid; grid-template-columns: 6.4rem 5.6rem 1fr; grid-template-areas: "ad wd lb" "by by asc"; gap: 0 .6rem; padding: .22rem .4rem; border-bottom: 1px solid var(--trace-soft); font-size: .84rem; align-items: baseline; }
+.mr .ad { grid-area: ad; font: .8rem var(--font-mono); color: var(--copper); }
+.mr .wd { grid-area: wd; font-weight: 500; color: var(--ink-dim); }
+.mr .by { grid-area: by; font-size: .72rem; color: var(--ink-faint); }
+.mr .asc { grid-area: asc; font-size: .72rem; color: var(--ink-faint); text-align: right; }
+.mr .lb { grid-area: lb; color: var(--copper); font: 600 .82rem var(--font-display); text-align: right; }
+.mr .lb em { color: var(--mint); font-style: normal; margin-left: .4rem; }
+.mr.used .wd { color: var(--ice); }
+.mr.isp { background: color-mix(in srgb, var(--mint) 12%, transparent); box-shadow: inset 3px 0 0 var(--mint); }
+.mr.flash { animation: flash 1.6s ease-out; }
+.mr.flash .wd { color: var(--copper); }
+
+/* ------------------------------------ Traza ------------------------------------ */
+.log-panel { max-height: 230px; overflow: auto; scrollbar-width: thin; scrollbar-color: var(--trace) transparent; }
+.sim-log .tabs { margin-bottom: .6rem; }
+.tl { display: grid; grid-template-columns: 3rem 4rem minmax(11rem, 1fr) 2fr; gap: .6rem; padding: .15rem .4rem; border-bottom: 1px solid var(--trace-soft); font-size: .86rem; align-items: baseline; }
+.tl .n { color: var(--ink-faint); text-align: right; } .tl .a { color: var(--copper); } .tl .s { color: var(--ice); } .tl .e { color: var(--ink-dim); }
+.tl.skip { opacity: .55; } .tl.bad, .tl.bad .e { color: var(--alert); }
+#sim-out { white-space: pre-wrap; padding: .3rem .5rem; min-height: 4rem; }
+
+/* -------------------------------- Responsive -------------------------------- */
+@media (max-width: 1280px) {
+  .sim-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "ed list" "regs mem" "step step" "log log"; }
+  .sim-regs { min-height: 0; }
+}
+@media (max-width: 800px) {
+  .sim-grid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "ed" "list" "regs" "step" "mem" "log"; }
+  .sim-editor { min-height: 420px; } .sim-listing { min-height: 320px; }
+  .step-body { grid-template-columns: 1fr; }
+  .sim-bar { position: static; }
+  .sim-status { margin-left: 0; }
+  .tl { grid-template-columns: 2.4rem 3.6rem 1fr; } .tl .e { grid-column: 1 / -1; padding-left: 2.4rem; }
+}

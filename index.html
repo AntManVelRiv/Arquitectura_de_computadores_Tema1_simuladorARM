@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tema 1 · Introducción y repertorio de instrucciones ARMv4</title>
+<meta name="description" content="Estudia el Tema 1 de Arquitectura de Computadores: teoría interactiva, simulador de ensamblador ARMv4, ejercicios autocorregidos y test.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='7' y='7' width='18' height='18' fill='%230a0f26' stroke='%2366c8ff' stroke-width='2'/%3E%3Cpath d='M12 3v4M16 3v4M20 3v4M12 25v4M16 25v4M20 25v4M3 12h4M3 16h4M3 20h4M25 12h4M25 16h4M25 20h4' stroke='%23ffa14a' stroke-width='2'/%3E%3Crect x='12' y='12' width='8' height='8' fill='%233ff0b8'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/sim.css">
+<script>
+  // Aplica el tema guardado antes de pintar (evita parpadeo)
+  try { var t = JSON.parse(localStorage.getItem('armlab.v1') || '{}').theme; if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</head>
+<body>
+<svg class="bg-traces" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <polyline points="0,180 260,180 320,240 700,240 760,300 1100,300 1160,360 1600,360"/>
+  <polyline points="0,620 180,620 240,560 520,560 580,620 980,620 1040,680 1600,680"/>
+  <polyline points="300,0 300,120 360,180 360,420 420,480 420,1000"/>
+  <polyline points="1200,0 1200,200 1260,260 1260,540 1320,600 1320,1000"/>
+  <polyline points="640,1000 640,860 700,800 1000,800 1060,740 1600,740"/>
+  <circle cx="320" cy="240" r="5"/><circle cx="760" cy="300" r="5"/><circle cx="1160" cy="360" r="5"/>
+  <circle cx="240" cy="560" r="5"/><circle cx="1040" cy="680" r="5"/><circle cx="360" cy="420" r="5"/>
+  <circle cx="1260" cy="540" r="5"/><circle cx="700" cy="800" r="5"/>
+</svg>
+
+<div class="app" id="app">
+  <aside class="rail" id="rail" aria-label="Navegación del tema">
+    <a class="brand" href="#/inicio" aria-label="Ir al inicio">
+      <svg viewBox="0 0 42 42" aria-hidden="true">
+        <g stroke="var(--copper)" stroke-width="2"><path d="M14 3v6M21 3v6M28 3v6M14 33v6M21 33v6M28 33v6M3 14h6M3 21h6M3 28h6M33 14h6M33 21h6M33 28h6"/></g>
+        <path d="M11 9h20l2 2v20l-2 2H11l-2-2V11z" fill="var(--die-3)" stroke="var(--ice)" stroke-width="2"/>
+        <rect x="16" y="16" width="10" height="10" fill="var(--mint)"/>
+      </svg>
+      <span><span class="brand-t">Tema 1</span><span class="brand-s">Arquitectura de Computadores</span></span>
+    </a>
+    <nav id="nav" class="nav-wrap"></nav>
+    <div class="rail-foot">
+      <div class="overall"><span id="overall-label">Progreso: 0 %</span><div class="meter"><i id="overall-bar"></i></div></div>
+      <div class="rail-tools">
+        <button class="btn ghost sm" id="btn-theme" type="button" aria-label="Cambiar entre tema oscuro y claro">Tema claro</button>
+        <button class="btn ghost sm" id="btn-reset" type="button" aria-label="Borrar mi progreso">Borrar progreso</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-wrap">
+    <header class="topbar">
+      <button class="btn ghost sm" id="btn-menu" type="button" aria-label="Abrir menú" aria-expanded="false">Menú</button>
+      <a class="brand" href="#/inicio"><span><span class="brand-t">Tema 1 · ARMv4</span></span></a>
+    </header>
+    <main class="main" id="main" tabindex="-1"></main>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="js/arm.js"></script>
+<script src="js/hl.js"></script>
+<script src="js/app.js"></script>
+<script src="js/examples.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/cpu-diagram.js"></script>
+<script src="js/widgets.js"></script>
+<script src="js/widgets2.js"></script>
+<script src="js/sim.js"></script>
+<script src="js/views-1.js"></script>
+<script src="js/views-2.js"></script>
+<script src="js/practice.js"></script>
+<script src="js/reference.js"></script>
+<script>App.start();</script>
+</body>
+</html>
